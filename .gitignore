@@ -1,0 +1,36 @@
+# IDE
+**/.idea/
+
+# SFDX
+.sfdx/
+.sf/
+.localdevserver/
+IlluminatedCloud/
+.illuminatedCloud/
+
+# Dependencies
+**/node_modules/
+
+# Build
+**/build/
+**/dist/
+out/
+target/
+
+# System Files
+.DS_Store
+*.db
+*.ini
+
+# Logs
+*.log
+
+
+# Secrets
+.env
+
+# Others
+tmp/
+**/tsconfig*.json
+**/*.tsbuildinfo
+**/graphql.config.yml

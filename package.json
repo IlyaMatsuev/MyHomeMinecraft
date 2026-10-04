@@ -1,0 +1,28 @@
+{
+  "name": "my-home-minecraft",
+  "version": "1.0.0",
+  "description": "This project contains configurations and instructions on how to set up a Minecraft server in the local network.",
+  "scripts": {
+    "prepare": "husky",
+    "prettier": "prettier --write",
+    "prettier:verify": "prettier --list-different"
+  },
+  "author": {
+    "name": "Ilya Matsuev",
+    "email": "ilya.matsuev.business@proton.me",
+    "url": "https://github.com/IlyaMatsuev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IlyaMatsuev/MyHomeMinecraft"
+  },
+  "devDependencies": {
+    "husky": "^9.1.6",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "**/*.{html,js,ts,css,xml,yaml,yml,json,md}": [
+      "npm run prettier"
+    ]
+  }
+}
