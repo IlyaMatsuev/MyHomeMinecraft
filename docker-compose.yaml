@@ -8,6 +8,8 @@ services:
     stop_grace_period: 1m
     stdin_open: true
     tty: true
+    # For DNS to work properly
+    network_mode: host
     ports:
       - "${SERVER_PORT:?set SERVER_PORT in .env}:${SERVER_PORT}"
     env_file: .env
