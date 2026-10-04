@@ -3,6 +3,11 @@ services:
     image: itzg/minecraft-server:latest
     container_name: minecraft
     restart: unless-stopped
+    # Docker's default 10s would SIGKILL a slow world save;
+    # Matches the image's own 60s STOP_DURATION
+    stop_grace_period: 1m
+    stdin_open: true
+    tty: true
     ports:
       - "${SERVER_PORT:?set SERVER_PORT in .env}:${SERVER_PORT}"
     env_file: .env
@@ -17,5 +22,3 @@ services:
       start_interval: 5s
     volumes:
       - ./data:/data
-    stdin_open: true
-    tty: true

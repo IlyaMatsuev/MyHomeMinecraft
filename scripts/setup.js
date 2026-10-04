@@ -45,7 +45,7 @@ async function main() {
     }
 
     if (!get(env, 'ONLINE_MODE')) {
-        const offline = await askYesNo('Allow unofficial launchers like TLauncher (offline mode)? [y/N] ');
+        const offline = await askYesNo('Allow unofficial launchers like TLauncher (offline mode)? [Y/n] ', true);
         env = set(env, 'ONLINE_MODE', offline ? 'FALSE' : 'TRUE');
     }
 
@@ -68,8 +68,7 @@ async function main() {
         while (true) {
             const name = await askUsername('> ', true);
             if (!name) {
-                break
-
+                break;
             }
             names.add(name + usernameSuffix);
         }
@@ -90,10 +89,10 @@ function set(env, key, value) {
     return line.test(env) ? env.replace(line, `${key}=${value}`) : `${env.trimEnd()}\n${key}=${value}\n`;
 }
 
-// Empty answer means no
-async function askYesNo(question) {
+// Empty answer picks the default
+async function askYesNo(question, defaultAnswer = false) {
     const answer = await askMatching(question, YES_NO_REGEX, '', true);
-    return answer.toLowerCase().startsWith('y');
+    return answer ? answer.toLowerCase().startsWith('y') : defaultAnswer;
 }
 
 function askUsername(question, allowEmpty = false) {

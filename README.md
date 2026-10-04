@@ -39,6 +39,11 @@ The game version of every player must match the server's `VERSION`.
 To use a hostname instead of the IP (e.g. `mc.example.duckdns.org`), point it to the host's LAN IP in your local DNS and enter it as the
 server address.
 
+> [!NOTE]
+> **Running the server on macOS?** The macOS firewall can block Docker Desktop, so other devices get "Can't connect to server" even though
+> the server is running. In **System Settings** → **Network** → **Firewall** → **Options…**, turn off "Block all incoming connections" and
+> set Docker to "Allow incoming connections". To play on the same Mac, connect to `localhost` instead, which isn't affected by the firewall.
+
 ### Configuration
 
 All settings live in `.env` and are passed to the [itzg/minecraft-server](https://docker-minecraft-server.readthedocs.io/) image,
@@ -49,6 +54,7 @@ Apply changes with `npm restart`.
 > Pin `VERSION` to a specific release (e.g. `26.3`) instead of `LATEST`. World upgrades are one-way, so back up `data/` before changing it, and never downgrade.
 
 The world and all server files are stored in `data/`. Back it up to keep your world.
+
 ### Commands
 
 To set up the `.env` file:
