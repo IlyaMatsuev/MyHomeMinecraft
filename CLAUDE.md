@@ -21,7 +21,7 @@ Vanilla Minecraft **Java Edition** server for a home LAN, run with Docker Compos
 ## Commands
 
 ```bash
-npm run setup                             # create .env from .env.example if missing (scripts/setup.sh)
+npm run setup                             # scripts/setup.js: create .env if missing, ask for empty OPS / ENABLE_WHITELIST / WHITELIST, save to .env
 npm start                                 # setup + start / apply config changes
 npm restart                               # setup + force-recreate the container
 docker compose logs -f minecraft          # logs

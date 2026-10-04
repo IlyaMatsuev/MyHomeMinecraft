@@ -6,7 +6,7 @@
     "prepare": "husky",
     "prettier": "prettier --write",
     "prettier:verify": "prettier --list-different",
-    "setup": "./scripts/setup.sh",
+    "setup": "node scripts/setup.js",
     "prestart": "npm run setup",
     "start": "docker compose up -d",
     "prerestart": "npm run setup",
