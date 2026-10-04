@@ -34,7 +34,18 @@ I use [TLauncher](https://tlauncher.org/) for my setup, but you can use any othe
 
 In Minecraft: **Multiplayer** → **Add Server** → paste the printed address. With the default port `25565` (unless changed in `.env`).
 
-The game version of every player must match the server's `VERSION`.
+The game version of every player must match the server's `VERSION`. Pick the plain release (e.g. "Release 26.3"), not Fabric/Forge: the
+server's mods are server-side only.
+
+#### Login
+
+On the first join, set your password in chat: `/register <password> <password>`.
+
+After that, log in on every join with `/login <password>`.
+
+> [!IMPORTANT]
+> Register every player's name (especially the admin's) right after the first start, before the server is reachable from the internet.
+> Whoever registers a name first owns its password.
 
 To use a hostname instead of the IP (e.g. `mc.example.duckdns.org`), point it to the host's LAN IP in your local DNS and enter it as the
 server address.

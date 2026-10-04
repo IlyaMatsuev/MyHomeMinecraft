@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Vanilla Minecraft **Java Edition** server for a home LAN, run with Docker Compose on a **Linux** host (no macOS/Windows support needed) using the
+Minecraft **Java Edition** server (vanilla gameplay on Fabric, for the server-side [EasyAuth](https://modrinth.com/mod/easyauth) mod) for a home LAN, run with Docker Compose on a **Linux** host (no macOS/Windows support needed) using the
 [`itzg/minecraft-server`](https://docker-minecraft-server.readthedocs.io/) image. This repo holds config only: no app code.
 
 ## Layout
@@ -16,7 +16,8 @@ Vanilla Minecraft **Java Edition** server for a home LAN, run with Docker Compos
   the port is published straight from the container instead of going through the existing Traefik proxy.
 - Players connect to `mc.<domain>.duckdns.org` (or the host's LAN IP). That name needs to resolve to the Docker host's LAN
   IP, the same way the other LAN-only `*.duckdns.org` services do. With the default port, clients don't need to type it.
-- LAN-only: **never** port-forward `SERVER_PORT` on the router.
+- Reachable from the internet via a router port forward of `SERVER_PORT`, so EasyAuth passwords are mandatory (see Rules). Never
+  publish RCON (`25575`).
 
 ## Commands
 
@@ -40,5 +41,8 @@ npm run prettier -- <file>                # format
 - `ONLINE_MODE=FALSE` by default (players use TLauncher). Offline mode allows unofficial launchers, but usernames are then unverified and
   `OPS`/`WHITELIST` entries need a `:offline` suffix, otherwise the image resolves them to the official account's UUID and they
   won't match. Switching modes later changes every player's UUID (inventories/progress don't carry over).
+- Offline mode can't verify names, so EasyAuth (`MODRINTH_PROJECTS=fabric-api,easyauth`) makes players `/register` a password and
+  `/login` on every join. Only server-side mods: players must be able to join with a plain vanilla client. The image doesn't fetch mod
+  dependencies by default, so list them explicitly (EasyAuth needs `fabric-api`). Its config lives in `data/config/EasyAuth/`.
 - Keep the whitelist enforced.
 - Prettier settings: YAML/JSON use 2 spaces and double quotes; everything else uses 4 spaces and single quotes, 140 columns.
