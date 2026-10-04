@@ -5,25 +5,26 @@ Vanilla Minecraft **Java Edition** server for a home LAN, run with Docker Compos
 
 ## Layout
 
-- `docker-compose.yml`: container wiring only (port, volume, `EULA`). Loads all settings via `env_file: .env`.
+- `docker-compose.yaml`: container wiring only (port, volume, `EULA`, health check timing for `--wait`). Loads all settings via `env_file: .env`.
 - `.env.example` → copy to `.env` (gitignored, claudeignored): every server setting, passed to the container as-is, so names must be [image env vars](https://docker-minecraft-server.readthedocs.io/en/latest/variables/). `server.properties` is generated from them. Compose refuses to start without `.env`.
 - `data/`: world, logs, generated `server.properties`, `whitelist.json`. Gitignored. **This is the save game. Never delete it.**
-- `package.json`: npm scripts wrapping Docker Compose (`prestart`/`prerestart` run `setup` first), plus Prettier + Husky. No build.
+- `package.json`: npm scripts wrapping Docker Compose (`setup` runs before `start`/`restart`, `status` after), plus Prettier + Husky. No build.
 
 ## Network
 
-- Minecraft is raw TCP on `25565`, not HTTP, and has no TLS. Traefik can't route it by hostname (`HostSNI` needs TLS), so
+- Minecraft is raw TCP (`SERVER_PORT` in `.env`, default `25565`), not HTTP, and has no TLS. Traefik can't route it by hostname (`HostSNI` needs TLS), so
   the port is published straight from the container instead of going through the existing Traefik proxy.
 - Players connect to `mc.<domain>.duckdns.org` (or the host's LAN IP). That name needs to resolve to the Docker host's LAN
-  IP, the same way the other LAN-only `*.duckdns.org` services do. Default port, so clients don't need `:25565`.
-- LAN-only: **never** port-forward 25565 on the router.
+  IP, the same way the other LAN-only `*.duckdns.org` services do. With the default port, clients don't need to type it.
+- LAN-only: **never** port-forward `SERVER_PORT` on the router.
 
 ## Commands
 
 ```bash
-npm run setup                             # scripts/setup.js: create .env if missing, ask for empty OPS / ENABLE_WHITELIST / WHITELIST, save to .env
-npm start                                 # setup + start / apply config changes
-npm restart                               # setup + force-recreate the container
+npm run setup                             # scripts/setup.js: create .env if missing, ask for empty SERVER_ADDRESS / OPS / ENABLE_WHITELIST / WHITELIST, save to .env
+npm start                                 # setup + start / apply config changes, waits until healthy (compose --wait), then status
+npm restart                               # same, but force-recreates the container
+npm run status                            # scripts/status.js: container state, Docker health (mc-health ping), SERVER_ADDRESS:SERVER_PORT
 docker compose logs -f minecraft          # logs
 docker exec -i minecraft rcon-cli         # server console (e.g. `whitelist add Name`, `op Name`, `save-all`)
 docker compose down                       # stop (world is saved on shutdown)

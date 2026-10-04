@@ -2,12 +2,16 @@
 // Creates .env file (if doesn't exist), and updates the server/minecraft settings when empty
 
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const readline = require('node:readline/promises');
 
 const MC_USERNAME_REGEX = /^\w{3,16}$/;
+const HOSTNAME_REGEX = /^[\w.-]+$/;
 const QUOTED_VALUE_REGEX = /^"(.*)"$/;
-const NO_ANSWER_REGEX = /^n/i;
+const YES_NO_REGEX = /^(y(es)?|no?)$/i;
+// Loopback, Docker/VM bridges and VPNs: not reachable by players on the LAN
+const VIRTUAL_INTERFACE_REGEX = /^(lo|docker|br-|veth|virbr|bridge|utun|tailscale|wg)/;
 // `KEY=value` line in .env, value captured
 const ENV_LINE_REGEX = key => new RegExp(`^${key}=(.*)$`, 'm');
 
@@ -16,14 +20,6 @@ const projectEnvPath = path.join(projectRootPath, '.env');
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-const QUESTIONS = {
-    OPS: {
-        question: 'Admin username: ',
-    },
-    ENABLE_WHITELIST: {
-        question: 'Enable whitelist? [Y/n] ',
-    }
-}
 
 main().catch(error => {
     // Ctrl+C rejects the pending rl.question()
@@ -40,13 +36,25 @@ async function main() {
     }
     let env = fs.readFileSync(projectEnvPath, 'utf8');
 
+    if (!get(env, 'SERVER_ADDRESS')) {
+        const serverIp = getServerIp();
+        const question = `Address players connect to, without port (hostname/IP)${serverIp ? ` [${serverIp}]` : ''}: `;
+
+        // Empty answer is only allowed when there's a detected IP to fall back to
+        const address = await askMatching(question, HOSTNAME_REGEX, 'Hostname or IP only, no port.', Boolean(serverIp));
+        env = set(env, 'SERVER_ADDRESS', address || serverIp);
+    }
+
     if (!get(env, 'OPS')) {
         env = set(env, 'OPS', await askUsername('Admin username: '));
     }
+
     if (!get(env, 'ENABLE_WHITELIST')) {
-        const enable = !NO_ANSWER_REGEX.test(await ask('Enable whitelist? [Y/n] '));
+        const answer = await askMatching('Enable whitelist? [y/N] ', YES_NO_REGEX, 'Answer y or n.', true);
+        const enable = answer.toLowerCase().startsWith('y');
         env = set(env, 'ENABLE_WHITELIST', enable ? 'TRUE' : 'FALSE');
     }
+
     if (get(env, 'ENABLE_WHITELIST').toUpperCase() === 'TRUE' && !get(env, 'WHITELIST')) {
         // Admins are always whitelisted
         const names = new Set(get(env, 'OPS').split(',').filter(Boolean));
@@ -76,6 +84,20 @@ function set(env, key, value) {
     return line.test(env) ? env.replace(line, `${key}=${value}`) : `${env.trimEnd()}\n${key}=${value}\n`;
 }
 
+function askUsername(question, allowEmpty = false) {
+    return askMatching(question, MC_USERNAME_REGEX, 'Usernames are 3-16 characters: letters, digits, underscore.', allowEmpty);
+}
+
+async function askMatching(question, regex, hint, allowEmpty = false) {
+    while (true) {
+        const answer = await ask(question);
+        if ((allowEmpty && !answer) || regex.test(answer)) {
+            return answer;
+        }
+        console.log(hint);
+    }
+}
+
 function ask(question) {
     // Check if possible to read from the terminal
     if (!process.stdin.isTTY) {
@@ -85,10 +107,9 @@ function ask(question) {
     return rl.question(question).then(answer => answer.trim());
 }
 
-async function askUsername(question, allowEmpty = false) {
-    for (;;) {
-        const name = await ask(question);
-        if ((allowEmpty && !name) || MC_USERNAME_REGEX.test(name)) return name;
-        console.log('Usernames are 3-16 characters: letters, digits, underscore.');
-    }
+function getServerIp() {
+    const addresses = Object.entries(os.networkInterfaces())
+        .filter(([name]) => !VIRTUAL_INTERFACE_REGEX.test(name))
+        .flatMap(([, list]) => list);
+    return addresses.find(address => address.family === 'IPv4' && !address.internal)?.address ?? '';
 }

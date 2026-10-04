@@ -7,10 +7,13 @@
     "prettier": "prettier --write",
     "prettier:verify": "prettier --list-different",
     "setup": "node scripts/setup.js",
+    "status": "node scripts/status.js",
     "prestart": "npm run setup",
-    "start": "docker compose up -d",
+    "start": "docker compose up -d --wait",
+    "poststart": "npm run status --silent",
     "prerestart": "npm run setup",
-    "restart": "docker compose up -d --force-recreate"
+    "restart": "docker compose up -d --force-recreate --wait",
+    "postrestart": "npm run status --silent"
   },
   "author": {
     "name": "Ilya Matsuev",
