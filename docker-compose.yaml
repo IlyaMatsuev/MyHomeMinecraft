@@ -8,8 +8,11 @@ services:
     stop_grace_period: 1m
     stdin_open: true
     tty: true
-    # For DNS to work properly
-    network_mode: host
+    # This image uses "mc-image-helper" to lookup and download the game version.
+    # It uses its own DNS client, so it cannot refer to the host's DNS rules
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     ports:
       - "${SERVER_PORT:?set SERVER_PORT in .env}:${SERVER_PORT}"
     env_file: .env
