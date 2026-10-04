@@ -34,3 +34,6 @@ tmp/
 **/tsconfig*.json
 **/*.tsbuildinfo
 **/graphql.config.yml
+
+# Minecraft world/server data
+data/**

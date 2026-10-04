@@ -1,0 +1,16 @@
+services:
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: minecraft
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    # All server settings live in .env (copy from .env.example). Compose fails if it's missing.
+    env_file: .env
+    environment:
+      # Accept terms & conditions
+      EULA: "TRUE"
+    volumes:
+      - ./data:/data
+    stdin_open: true
+    tty: true

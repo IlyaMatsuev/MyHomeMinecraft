@@ -29,3 +29,6 @@ target/
 
 # Other
 tmp/
+
+# Minecraft world/server data
+data/
