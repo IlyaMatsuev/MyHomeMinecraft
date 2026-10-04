@@ -11,7 +11,7 @@ const HOSTNAME_REGEX = /^[\w.-]+$/;
 const QUOTED_VALUE_REGEX = /^"(.*)"$/;
 const YES_NO_REGEX = /^(y(es)?|no?)$/i;
 // Loopback, Docker/VM bridges and VPNs: not reachable by players on the LAN
-const VIRTUAL_INTERFACE_REGEX = /^(lo|docker|br-|veth|virbr|bridge|utun|tailscale|wg)/;
+const VIRTUAL_INTERFACE_REGEX = /^(lo|docker|br-|veth|virbr|tailscale|wg)/;
 // `KEY=value` line in .env, value captured
 const ENV_LINE_REGEX = key => new RegExp(`^${key}=(.*)$`, 'm');
 
@@ -19,7 +19,6 @@ const projectRootPath = path.join(__dirname, '..');
 const projectEnvPath = path.join(projectRootPath, '.env');
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-
 
 main().catch(error => {
     // Ctrl+C rejects the pending rl.question()
@@ -45,13 +44,20 @@ async function main() {
         env = set(env, 'SERVER_ADDRESS', address || serverIp);
     }
 
+    if (!get(env, 'ONLINE_MODE')) {
+        const offline = await askYesNo('Allow unofficial launchers like TLauncher (offline mode)? [y/N] ');
+        env = set(env, 'ONLINE_MODE', offline ? 'FALSE' : 'TRUE');
+    }
+
+    // Offline players get a name-based UUID: `:offline` makes the image generate it instead of looking up the official account
+    const usernameSuffix = get(env, 'ONLINE_MODE').toUpperCase() === 'FALSE' ? ':offline' : '';
+
     if (!get(env, 'OPS')) {
-        env = set(env, 'OPS', await askUsername('Admin username: '));
+        env = set(env, 'OPS', (await askUsername('Admin username: ')) + usernameSuffix);
     }
 
     if (!get(env, 'ENABLE_WHITELIST')) {
-        const answer = await askMatching('Enable whitelist? [y/N] ', YES_NO_REGEX, 'Answer y or n.', true);
-        const enable = answer.toLowerCase().startsWith('y');
+        const enable = await askYesNo('Enable whitelist? [y/N] ');
         env = set(env, 'ENABLE_WHITELIST', enable ? 'TRUE' : 'FALSE');
     }
 
@@ -61,11 +67,11 @@ async function main() {
         console.log(`Whitelisted usernames, one per line, empty line to finish (already added: ${[...names].join(', ')})`);
         while (true) {
             const name = await askUsername('> ', true);
-            if (name) {
-                names.add(name);
-            } else {
-                break;
+            if (!name) {
+                break
+
             }
+            names.add(name + usernameSuffix);
         }
         env = set(env, 'WHITELIST', [...names].join(','));
     }
@@ -82,6 +88,12 @@ function get(env, key) {
 function set(env, key, value) {
     const line = ENV_LINE_REGEX(key);
     return line.test(env) ? env.replace(line, `${key}=${value}`) : `${env.trimEnd()}\n${key}=${value}\n`;
+}
+
+// Empty answer means no
+async function askYesNo(question) {
+    const answer = await askMatching(question, YES_NO_REGEX, '', true);
+    return answer.toLowerCase().startsWith('y');
 }
 
 function askUsername(question, allowEmpty = false) {

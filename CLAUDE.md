@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Vanilla Minecraft **Java Edition** server for a home LAN, run with Docker Compose using the
+Vanilla Minecraft **Java Edition** server for a home LAN, run with Docker Compose on a **Linux** host (no macOS/Windows support needed) using the
 [`itzg/minecraft-server`](https://docker-minecraft-server.readthedocs.io/) image. This repo holds config only: no app code.
 
 ## Layout
@@ -37,6 +37,8 @@ npm run prettier -- <file>                # format
   both players' launchers have the new version. World upgrades are one-way, so back up `data/` first and never downgrade.
   To find the latest release:
   `curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | python3 -c 'import json,sys; print(json.load(sys.stdin)["latest"]["release"])'`
-- `ONLINE_MODE` stays on (the default): every player needs a paid Java account. Don't turn it off.
+- `ONLINE_MODE=FALSE` by default (players use TLauncher). Offline mode allows unofficial launchers, but usernames are then unverified and
+  `OPS`/`WHITELIST` entries need a `:offline` suffix, otherwise the image resolves them to the official account's UUID and they
+  won't match. Switching modes later changes every player's UUID (inventories/progress don't carry over).
 - Keep the whitelist enforced.
 - Prettier settings: YAML/JSON use 2 spaces and double quotes; everything else uses 4 spaces and single quotes, 140 columns.

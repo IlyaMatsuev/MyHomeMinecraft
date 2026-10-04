@@ -4,7 +4,7 @@ services:
     container_name: minecraft
     restart: unless-stopped
     ports:
-      - "${SERVER_PORT:?set SERVER_PORT in .env}:25565"
+      - "${SERVER_PORT:?set SERVER_PORT in .env}:${SERVER_PORT}"
     env_file: .env
     environment:
       # Accept terms & conditions
