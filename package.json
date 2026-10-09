@@ -12,7 +12,8 @@
     "start": "docker compose up -d --wait",
     "poststart": "npm run status --silent",
     "prerestart": "npm run setup",
-    "restart": "docker compose up -d --force-recreate --wait",
+    "restart": "docker compose up -d --wait",
+    "restart:hard": "docker compose up -d --force-recreate --wait",
     "postrestart": "npm run status --silent"
   },
   "author": {
