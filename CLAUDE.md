@@ -43,6 +43,6 @@ npm run prettier -- <file>                # format
   won't match. Switching modes later changes every player's UUID (inventories/progress don't carry over).
 - Offline mode can't verify names, so EasyAuth (`MODRINTH_PROJECTS=fabric-api,easyauth`) makes players `/register` a password and
   `/login` on every join. Only server-side mods: players must be able to join with a plain vanilla client. The image doesn't fetch mod
-  dependencies by default, so list them explicitly (EasyAuth needs `fabric-api`). Its config lives in `data/config/EasyAuth/`.
+  dependencies by default, so list them explicitly (EasyAuth needs `fabric-api`, Universal Graves needs `polymer`). Its config lives in `data/config/EasyAuth/`.
 - Keep the whitelist enforced.
 - Prettier settings: YAML/JSON use 2 spaces and double quotes; everything else uses 4 spaces and single quotes, 140 columns.
